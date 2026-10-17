@@ -138,14 +138,16 @@ def make_pdf(invoice, items, logo_bytes=None):
         except Exception:
             pass
 
+    # Center the company name and address across the PDF page.
     pdf.setFillColorRGB(0.75, 0.0, 0.0)
-    pdf.setFont("Helvetica-Bold", 19)
-    pdf.drawString(left + (85 if logo_bytes else 0), y - 20, invoice["company"][:55])
+    pdf.setFont("Helvetica-Bold", 25)
+    pdf.drawCentredString(width / 2, y - 20, invoice["company"][:70])
+
     pdf.setFillColorRGB(0, 0, 0)
     pdf.setFont("Helvetica", 9)
     address_y = y - 42
     for line in invoice["address"].splitlines()[:4]:
-        pdf.drawString(left + (85 if logo_bytes else 0), address_y, line[:85])
+        pdf.drawCentredString(width / 2, address_y, line[:110])
         address_y -= 12
 
     y = min(address_y, y - 75) - 20
@@ -158,7 +160,7 @@ def make_pdf(invoice, items, logo_bytes=None):
     y -= 25
     pdf.setFont("Helvetica", 10)
     pdf.drawString(left, y, f"Invoice No: {invoice['invoice_no']}")
-    pdf.drawString(left + 250, y, f"Date: {invoice['invoice_date']}")
+    pdf.drawRightString(right, y, f"Date: {invoice['invoice_date']}")
     y -= 18
     pdf.drawString(left, y, f"Bill To: {invoice['customer'][:70]}")
     y -= 16
@@ -199,8 +201,18 @@ def make_pdf(invoice, items, logo_bytes=None):
     y -= 15
     pdf.setFont("Helvetica-Bold", 12)
     pdf.drawRightString(right - 8, y, f"Grand Total: Rs. {invoice['total']:,.2f}")
-    y -= 35
+
+    # Signature area below the grand total (right side).
+    y -= 24
+    signature_x = right - 150
+    pdf.setStrokeColorRGB(0, 0, 0)
+    pdf.setLineWidth(0.8)
+    pdf.line(signature_x, y, right - 8, y)
+    y -= 13
     pdf.setFont("Helvetica", 9)
+    pdf.drawRightString(right - 8, y, "Authorized Signature")
+
+    y -= 22
     pdf.drawString(left, y, "Thank you for your business!")
     pdf.save()
     return buffer.getvalue()
